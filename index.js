@@ -357,6 +357,859 @@
 
 // *******************************************************************
 
+// const express = require('express');
+// const cors = require('cors');
+// require('dotenv').config();
+// const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+
+// const app = express();
+// const port = process.env.PORT || 5000;
+
+// // Middleware
+// app.use(cors());
+// app.use(express.json());
+
+// const uri = process.env.MONGO_DB_URI;
+// const client = new MongoClient(uri, {
+//   serverApi: {
+//     version: ServerApiVersion.v1,
+//     strict: true,
+//     deprecationErrors: true,
+//   }
+// });
+
+// async function run() {
+//   try {
+//     // MongoDB কানেকশন স্টাবলিশমেন্ট
+//     await client.connect();
+//     const database = client.db("legalease_db");
+    
+//     // কালেকশন ডিক্লারেশন সমূহ
+//     const servicesCollection = database.collection("services");
+//     const hiringsCollection = database.collection("hirings");
+//     const lawyerProfilesCollection = database.collection("lawyer_profiles"); // নতুন প্রোফাইল কালেকশন
+
+//     console.log("Pinged your deployment. You successfully connected to MongoDB!");
+
+//     /* =========================================================================
+//        ১. SERVICES ENDPOINTS (CRUD)
+//        ========================================================================= */
+//     app.post('/services', async (req, res) => {
+//       const newService = req.body;
+//       const result = await servicesCollection.insertOne(newService);
+//       res.send(result);
+//     });
+
+//     app.get('/services', async (req, res) => {
+//       const result = await servicesCollection.find().toArray();
+//       res.send(result);
+//     });
+
+//     app.put('/services/:id', async (req, res) => {
+//       const id = req.params.id;
+//       const filter = { _id: new ObjectId(id) };
+//       const updatedDoc = { $set: req.body };
+//       const result = await servicesCollection.updateOne(filter, updatedDoc);
+//       res.send(result);
+//     });
+
+//     app.delete('/services/:id', async (req, res) => {
+//       const id = req.params.id;
+//       const filter = { _id: new ObjectId(id) };
+//       const result = await servicesCollection.deleteOne(filter);
+//       res.send(result);
+//     });
+
+//     /* =========================================================================
+//        ২. LAWYER HIRING HISTORY ENDPOINTS (Inbound Case Requests)
+//        ========================================================================= */
+//     app.get('/lawyer/hirings/:email', async (req, res) => {
+//       try {
+//         const email = req.params.email;
+//         const query = { lawyerEmail: email };
+//         const result = await hiringsCollection.find(query).sort({ _id: -1 }).toArray();
+//         res.send(result);
+//       } catch (error) {
+//         res.status(500).send({ message: "Database streaming read failure.", error });
+//       }
+//     });
+
+//     app.patch('/hirings/:id', async (req, res) => {
+//       try {
+//         const id = req.params.id;
+//         const { status } = req.body;
+//         const filter = { _id: new ObjectId(id) };
+//         const updateDoc = {
+//           $set: { status: status }
+//         };
+//         const result = await hiringsCollection.updateOne(filter, updateDoc);
+//         res.send(result);
+//       } catch (error) {
+//         res.status(500).send({ message: "Server mutation rejected status change.", error });
+//       }
+//     });
+
+//     /* =========================================================================
+//        ৩. LAWYER BROWSE & DIRECTORY APIS (Aligned with HireLoop Spec)
+//        ========================================================================= */
+    
+//     // GET: সমস্ত আইনজীবীর প্রোফাইল ফিল্টারসহ নিয়ে আসা
+//     app.get('/api/lawyers', async (req, res) => {
+//       try {
+//         const query = {};
+//         // যদি স্পেশালটি কুয়েরি প্যারামিটার থাকে (যেমন: /api/lawyers?specialty=Corporate)
+//         if (req.query.specialty) {
+//           query.specialty = { $regex: req.query.specialty, $options: 'i' }; // Case-insensitive অনুসন্ধান
+//         }
+//         const cursor = lawyerProfilesCollection.find(query).sort({ _id: -1 });
+//         const result = await cursor.toArray();
+//         res.send(result);
+//       } catch (error) {
+//         res.status(500).send({ message: "Failed to stream lawyer profiles.", error });
+//       }
+//     });
+
+//     // GET: সুনির্দিষ্ট আইডি দিয়ে একজন আইনজীবীর প্রোফাইল বের করা
+//     app.get('/api/lawyers/:id', async (req, res) => {
+//       try {
+//         const id = req.params.id;
+//         const query = { _id: new ObjectId(id) };
+//         const result = await lawyerProfilesCollection.findOne(query);
+//         if (!result) {
+//           return res.status(404).send({ message: "Lawyer profile node not found." });
+//         }
+//         res.send(result);
+//       } catch (error) {
+//         res.status(500).send({ message: "Error targeting direct object profile.", error });
+//       }
+//     });
+
+//     // POST: নতুন আইনজীবীর প্রোফাইল ডাটাবেজে যুক্ত করা
+//     app.post('/api/lawyers', async (req, res) => {
+//       try {
+//         const profile = req.body;
+//         const newProfile = {
+//           ...profile,
+//           createdAt: new Date()
+//         };
+//         const result = await lawyerProfilesCollection.insertOne(newProfile);
+//         res.send(result);
+//       } catch (error) {
+//         res.status(500).send({ message: "Onboarding state mutation rejected.", error });
+//       }
+//     });
+
+//     // Send a ping to confirm a successful connection
+//     await client.db("admin").command({ ping: 1 });
+//     console.log("Database environment baseline checks verified successfully.");
+
+//   } finally {
+//     // ক্লায়েন্ট অন থাকবে যাতে অনবরত কানেকশন রিসিভ করা যায়
+//   }
+// }
+// run().catch(console.dir);
+
+// app.get('/', (req, res) => {
+//   res.send('LegalEase Workflow Optimization Engine Running...');
+// });
+
+// app.listen(port, () => {
+//   console.log(`Server listening quietly on port ${port}`);
+// });
+
+// *************************************************************
+
+// const express = require('express');
+// const cors = require('cors');
+// require('dotenv').config();
+// const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+
+// const app = express();
+// const port = process.env.PORT || 5000;
+
+// // Middleware
+// app.use(cors());
+// app.use(express.json());
+
+// const uri = process.env.MONGO_DB_URI;
+// const client = new MongoClient(uri, {
+//   serverApi: {
+//     version: ServerApiVersion.v1,
+//     strict: true,
+//     deprecationErrors: true,
+//   }
+// });
+
+// async function run() {
+//   try {
+//     // MongoDB Connection Establishment
+//     await client.connect();
+//     const database = client.db("legalease_db");
+    
+//     // Collection Declarations
+//     const servicesCollection = database.collection("services");
+//     const hiringsCollection = database.collection("hirings");
+//     const lawyerProfilesCollection = database.collection("lawyer_profiles");
+//     const usersCollection = database.collection("users"); // Added to sync Better-Auth session accounts
+
+//     console.log("Pinged your deployment. You successfully connected to MongoDB!");
+
+//     /* =========================================================================
+//        1. USER METADATA SYNC & PROFILE MANAGEMENT
+//        ========================================================================= */
+    
+//     // POST: Sync account details on initialization or check current profile status
+//     app.post('/api/users/sync', async (req, res) => {
+//       try {
+//         const { email, name, role, image } = req.body;
+//         if (!email) return res.status(400).send({ message: "Email context parameter is required." });
+
+//         const filter = { email: email.toLowerCase().trim() };
+//         const updateDoc = {
+//           $set: {
+//             name,
+//             role: role || 'client',
+//             image,
+//             updatedAt: new Date()
+//           },
+//           $setOnInsert: {
+//             createdAt: new Date()
+//           }
+//         };
+
+//         const result = await usersCollection.updateOne(filter, updateDoc, { upsert: true });
+//         res.send(result);
+//       } catch (error) {
+//         res.status(500).send({ message: "Account mapping initialization sequence failed.", error });
+//       }
+//     });
+
+//     /* =========================================================================
+//        2. SERVICES ENDPOINTS (CRUD)
+//        ========================================================================= */
+//     app.post('/api/services', async (req, res) => {
+//       try {
+//         const newService = req.body;
+//         const result = await servicesCollection.insertOne({
+//           ...newService,
+//           createdAt: new Date()
+//         });
+//         res.send(result);
+//       } catch (error) {
+//         res.status(500).send({ message: "Failed to persist service asset allocation.", error });
+//       }
+//     });
+
+//     app.get('/api/services', async (req, res) => {
+//       try {
+//         const result = await servicesCollection.find().sort({ _id: -1 }).toArray();
+//         res.send(result);
+//       } catch (error) {
+//         res.status(500).send({ message: "Error streaming database services.", error });
+//       }
+//     });
+
+//     app.put('/api/services/:id', async (req, res) => {
+//       try {
+//         const id = req.params.id;
+//         const filter = { _id: new ObjectId(id) };
+//         const updatedDoc = { $set: req.body };
+//         const result = await servicesCollection.updateOne(filter, updatedDoc);
+//         res.send(result);
+//       } catch (error) {
+//         res.status(500).send({ message: "Service records processing mutation rejected.", error });
+//       }
+//     });
+
+//     app.delete('/api/services/:id', async (req, res) => {
+//       try {
+//         const id = req.params.id;
+//         const filter = { _id: new ObjectId(id) };
+//         const result = await servicesCollection.deleteOne(filter);
+//         res.send(result);
+//       } catch (error) {
+//         res.status(500).send({ message: "Service execution thread failed deletion.", error });
+//       }
+//     });
+
+//     /* =========================================================================
+//        3. LAWYER HIRING HISTORY ENDPOINTS (Inbound Case Requests)
+//        ========================================================================= */
+    
+//     // GET: Fetch case history filtered by target lawyer email
+//     app.get('/api/lawyer/hirings/:email', async (req, res) => {
+//       try {
+//         const email = req.params.email;
+//         const query = { lawyerEmail: email.toLowerCase().trim() };
+//         const result = await hiringsCollection.find(query).sort({ _id: -1 }).toArray();
+//         res.send(result);
+//       } catch (error) {
+//         res.status(500).send({ message: "Database streaming read failure.", error });
+//       }
+//     });
+
+//     // POST: Create a new hiring case request (Client hiring a Lawyer)
+//     app.post('/api/hirings', async (req, res) => {
+//       try {
+//         const hiringData = req.body;
+//         const result = await hiringsCollection.insertOne({
+//           ...hiringData,
+//           status: hiringData.status || 'pending',
+//           createdAt: new Date()
+//         });
+//         res.send(result);
+//       } catch (error) {
+//         res.status(500).send({ message: "Failed to register application record pipeline.", error });
+//       }
+//     });
+
+//     app.patch('/api/hirings/:id', async (req, res) => {
+//       try {
+//         const id = req.params.id;
+//         const { status } = req.body;
+//         const filter = { _id: new ObjectId(id) };
+//         const updateDoc = {
+//           $set: { status: status }
+//         };
+//         const result = await hiringsCollection.updateOne(filter, updateDoc);
+//         res.send(result);
+//       } catch (error) {
+//         res.status(500).send({ message: "Server mutation rejected status change.", error });
+//       }
+//     });
+
+//     /* =========================================================================
+//        4. LAWYER BROWSE & DIRECTORY APIS 
+//        ========================================================================= */
+    
+//     // GET: Fetch all profiles with case-insensitive search queries
+//     app.get('/api/lawDynamic', async (req, res) => {
+//       try {
+//         const query = {};
+//         if (req.query.specialty) {
+//           query.specialty = { $regex: req.query.specialty, $options: 'i' };
+//         }
+//         const result = await lawyerProfilesCollection.find(query).sort({ _id: -1 }).toArray();
+//         res.send(result);
+//       } catch (error) {
+//         res.status(500).send({ message: "Failed to stream lawyer profiles.", error });
+//       }
+//     });
+
+//     // GET: Specific lawyer profile data by reference ID
+//     app.get('/api/lawDynamic/:id', async (req, res) => {
+//       try {
+//         const id = req.params.id;
+//         const query = { _id: new ObjectId(id) };
+//         const result = await lawyerProfilesCollection.findOne(query);
+//         if (!result) {
+//           return res.status(404).send({ message: "Lawyer profile node not found." });
+//         }
+//         res.send(result);
+//       } catch (error) {
+//         res.status(500).send({ message: "Error targeting direct object profile.", error });
+//       }
+//     });
+
+//     // POST: Create or update a direct lawyer profile catalog entry
+//     app.post('/api/lawDynamic', async (req, res) => {
+//       try {
+//         const profile = req.body;
+//         const newProfile = {
+//           ...profile,
+//           createdAt: new Date()
+//         };
+//         const result = await lawyerProfilesCollection.insertOne(newProfile);
+//         res.send(result);
+//       } catch (error) {
+//         res.status(500).send({ message: "Onboarding state mutation rejected.", error });
+//       }
+//     });
+
+//     // Send a ping to confirm a successful connection
+//     await client.db("admin").command({ ping: 1 });
+//     console.log("Database environment baseline checks verified successfully.");
+
+//   } finally {
+//     // Client remains open continuously
+//   }
+// }
+// run().catch(console.dir);
+
+// app.get('/', (req, res) => {
+//   res.send('LegalEase Workflow Optimization Engine Running...');
+// });
+
+// app.listen(port, () => {
+//   console.log(`Server listening quietly on port ${port}`);
+// });
+
+// *******************************************************
+
+// const express = require('express');
+// const cors = require('cors');
+// require('dotenv').config();
+// const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+
+// const app = express();
+// const port = process.env.PORT || 5000;
+
+// // Middleware
+// app.use(cors());
+// app.use(express.json());
+
+// const uri = process.env.MONGO_DB_URI;
+// const client = new MongoClient(uri, {
+//   serverApi: {
+//     version: ServerApiVersion.v1,
+//     strict: true,
+//     deprecationErrors: true,
+//   }
+// });
+
+// async function run() {
+//   try {
+//     // MongoDB কানেকশন স্টাবলিশমেন্ট
+//     await client.connect();
+//     const database = client.db("legalease_db");
+    
+//     // কালেকশন ডিক্লারেশন সমূহ
+//     const servicesCollection = database.collection("services");
+//     const hiringsCollection = database.collection("hirings");
+//     const lawyerProfilesCollection = database.collection("lawyer_profiles");
+//     const usersCollection = database.collection("users");
+
+//     console.log("Pinged your deployment. You successfully connected to MongoDB!");
+
+//     /* =========================================================================
+//        ১. USER METADATA SYNC & PROFILE MANAGEMENT
+//        ========================================================================= */
+//     app.post('/api/users/sync', async (req, res) => {
+//       try {
+//         const { email, name, role, image } = req.body;
+//         if (!email) return res.status(400).send({ message: "Email parameter is required." });
+
+//         const filter = { email: email.toLowerCase().trim() };
+//         const updateDoc = {
+//           $set: {
+//             name,
+//             role: role || 'client',
+//             image,
+//             updatedAt: new Date()
+//           },
+//           $setOnInsert: {
+//             createdAt: new Date()
+//           }
+//         };
+
+//         const result = await usersCollection.updateOne(filter, updateDoc, { upsert: true });
+//         res.send(result);
+//       } catch (error) {
+//         res.status(500).send({ message: "Account mapping failed.", error });
+//       }
+//     });
+
+//     /* =========================================================================
+//        ২. SERVICES ENDPOINTS (CRUD)
+//        ========================================================================= */
+//     app.post('/api/services', async (req, res) => {
+//       try {
+//         const newService = req.body;
+//         const result = await servicesCollection.insertOne({
+//           ...newService,
+//           createdAt: new Date()
+//         });
+//         res.send(result);
+//       } catch (error) {
+//         res.status(500).send({ message: "Failed to create service.", error });
+//       }
+//     });
+
+//     app.get('/api/services', async (req, res) => {
+//       try {
+//         const result = await servicesCollection.find().sort({ _id: -1 }).toArray();
+//         res.send(result);
+//       } catch (error) {
+//         res.status(500).send({ message: "Error streaming services.", error });
+//       }
+//     });
+
+//     app.put('/api/services/:id', async (req, res) => {
+//       try {
+//         const id = req.params.id;
+//         const filter = { _id: new ObjectId(id) };
+//         const updatedDoc = { $set: req.body };
+//         const result = await servicesCollection.updateOne(filter, updatedDoc);
+//         res.send(result);
+//       } catch (error) {
+//         res.status(500).send({ message: "Service mutation rejected.", error });
+//       }
+//     });
+
+//     app.delete('/api/services/:id', async (req, res) => {
+//       try {
+//         const id = req.params.id;
+//         const filter = { _id: new ObjectId(id) };
+//         const result = await servicesCollection.deleteOne(filter);
+//         res.send(result);
+//       } catch (error) {
+//         res.status(500).send({ message: "Service deletion failed.", error });
+//       }
+//     });
+
+//     /* =========================================================================
+//        ৩. LAWYER HIRING HISTORY ENDPOINTS (Inbound Case Requests)
+//        ========================================================================= */
+//     app.get('/api/lawyer/hirings/:email', async (req, res) => {
+//       try {
+//         const email = req.params.email;
+//         const query = { lawyerEmail: email.toLowerCase().trim() };
+//         const result = await hiringsCollection.find(query).sort({ _id: -1 }).toArray();
+//         res.send(result);
+//       } catch (error) {
+//         res.status(500).send({ message: "Database read failure.", error });
+//       }
+//     });
+
+//     app.post('/api/hirings', async (req, res) => {
+//       try {
+//         const hiringData = req.body;
+//         const result = await hiringsCollection.insertOne({
+//           ...hiringData,
+//           status: hiringData.status || 'pending',
+//           createdAt: new Date()
+//         });
+//         res.send(result);
+//       } catch (error) {
+//         res.status(500).send({ message: "Failed to register case record.", error });
+//       }
+//     });
+
+//     app.patch('/api/hirings/:id', async (req, res) => {
+//       try {
+//         const id = req.params.id;
+//         const { status } = req.body;
+//         const filter = { _id: new ObjectId(id) };
+//         const updateDoc = {
+//           $set: { status: status }
+//         };
+//         const result = await hiringsCollection.updateOne(filter, updateDoc);
+//         res.send(result);
+//       } catch (error) {
+//         res.status(500).send({ message: "Server mutation rejected status change.", error });
+//       }
+//     });
+
+//     /* =========================================================================
+//        ৪. LAWYER BROWSE & DIRECTORY APIS 
+//        ========================================================================= */
+//     app.get('/api/lawyers', async (req, res) => {
+//       try {
+//         const query = {};
+//         if (req.query.specialty) {
+//           query.specialty = { $regex: req.query.specialty, $options: 'i' };
+//         }
+//         const result = await lawyerProfilesCollection.find(query).sort({ _id: -1 }).toArray();
+//         res.send(result);
+//       } catch (error) {
+//         res.status(500).send({ message: "Failed to stream lawyer profiles.", error });
+//       }
+//     });
+
+//     app.get('/api/lawyers/:id', async (req, res) => {
+//       try {
+//         const id = req.params.id;
+//         const query = { _id: new ObjectId(id) };
+//         const result = await lawyerProfilesCollection.findOne(query);
+//         if (!result) {
+//           return res.status(404).send({ message: "Lawyer profile node not found." });
+//         }
+//         res.send(result);
+//       } catch (error) {
+//         res.status(500).send({ message: "Error targeting profile object.", error });
+//       }
+//     });
+
+//     app.post('/api/lawyers', async (req, res) => {
+//       try {
+//         const profile = req.body;
+//         const newProfile = {
+//           ...profile,
+//           createdAt: new Date()
+//         };
+//         const result = await lawyerProfilesCollection.insertOne(newProfile);
+//         res.send(result);
+//       } catch (error) {
+//         res.status(500).send({ message: "Profile creation rejected.", error });
+//       }
+//     });
+
+//     // Baseline checks
+//     await client.db("admin").command({ ping: 1 });
+//     console.log("Database baseline checks verified successfully.");
+
+//   } finally {
+//     // Client remains open
+//   }
+// }
+// run().catch(console.dir);
+
+// app.get('/', (req, res) => {
+//   res.send('LegalEase Workflow Optimization Engine Running...');
+// });
+
+// app.listen(port, () => {
+//   console.log(`Server listening quietly on port ${port}`);
+// });
+
+// ************************************************************
+
+// const express = require('express');
+// const cors = require('cors');
+// require('dotenv').config();
+// const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+
+// const app = express();
+// const port = process.env.PORT || 5000;
+
+// // Middleware
+// app.use(cors());
+// app.use(express.json());
+
+// const uri = process.env.MONGO_DB_URI;
+// const client = new MongoClient(uri, {
+//   serverApi: {
+//     version: ServerApiVersion.v1,
+//     strict: true,
+//     deprecationErrors: true,
+//   }
+// });
+
+// async function run() {
+//   try {
+//     // MongoDB কানেকশন স্টাবলিশমেন্ট
+//     await client.connect();
+//     const database = client.db("legalease_db");
+    
+//     // কালেকশন ডিক্লারেশন সমূহ
+//     const servicesCollection = database.collection("services");
+//     const hiringsCollection = database.collection("hirings");
+//     const lawyerProfilesCollection = database.collection("lawyer_profiles");
+//     const usersCollection = database.collection("users");
+
+//     console.log("Pinged your deployment. You successfully connected to MongoDB!");
+
+//     /* =========================================================================
+//        ১. USER METADATA SYNC & PROFILE MANAGEMENT
+//        ========================================================================= */
+//     app.post('/api/users/sync', async (req, res) => {
+//       try {
+//         const { email, name, role, image } = req.body;
+//         if (!email) return res.status(400).send({ message: "Email parameter is required." });
+
+//         const filter = { email: email.toLowerCase().trim() };
+//         const updateDoc = {
+//           $set: {
+//             name,
+//             role: role || 'client',
+//             image,
+//             updatedAt: new Date()
+//           },
+//           $setOnInsert: {
+//             createdAt: new Date()
+//           }
+//         };
+
+//         const result = await usersCollection.updateOne(filter, updateDoc, { upsert: true });
+//         res.send(result);
+//       } catch (error) {
+//         res.status(500).send({ message: "Account mapping failed.", error });
+//       }
+//     });
+
+//     /* =========================================================================
+//        ২. SERVICES ENDPOINTS (CRUD)
+//        ========================================================================= */
+//     app.post('/api/services', async (req, res) => {
+//       try {
+//         const newService = req.body;
+//         const result = await servicesCollection.insertOne({
+//           ...newService,
+//           createdAt: new Date()
+//         });
+//         res.send(result);
+//       } catch (error) {
+//         res.status(500).send({ message: "Failed to create service.", error });
+//       }
+//     });
+
+//     app.get('/api/services', async (req, res) => {
+//       try {
+//         const result = await servicesCollection.find().sort({ _id: -1 }).toArray();
+//         res.send(result);
+//       } catch (error) {
+//         res.status(500).send({ message: "Error streaming services.", error });
+//       }
+//     });
+
+//     app.put('/api/services/:id', async (req, res) => {
+//       try {
+//         const id = req.params.id;
+//         const filter = { _id: new ObjectId(id) };
+//         const updatedDoc = { $set: req.body };
+//         const result = await servicesCollection.updateOne(filter, updatedDoc);
+//         res.send(result);
+//       } catch (error) {
+//         res.status(500).send({ message: "Service mutation rejected.", error });
+//       }
+//     });
+
+//     app.delete('/api/services/:id', async (req, res) => {
+//       try {
+//         const id = req.params.id;
+//         const filter = { _id: new ObjectId(id) };
+//         const result = await servicesCollection.deleteOne(filter);
+//         res.send(result);
+//       } catch (error) {
+//         res.status(500).send({ message: "Service deletion failed.", error });
+//       }
+//     });
+
+//     /* =========================================================================
+//        ৩. LAWYER HIRING HISTORY ENDPOINTS (Inbound Case Requests)
+//        ========================================================================= */
+//     app.get('/api/lawyer/hirings/:email', async (req, res) => {
+//       try {
+//         const email = req.params.email;
+//         const query = { lawyerEmail: email.toLowerCase().trim() };
+//         const result = await hiringsCollection.find(query).sort({ _id: -1 }).toArray();
+//         res.send(result);
+//       } catch (error) {
+//         res.status(500).send({ message: "Database read failure.", error });
+//       }
+//     });
+
+//     app.post('/api/hirings', async (req, res) => {
+//       try {
+//         const hiringData = req.body;
+//         const result = await hiringsCollection.insertOne({
+//           ...hiringData,
+//           status: hiringData.status || 'pending',
+//           createdAt: new Date()
+//         });
+//         res.send(result);
+//       } catch (error) {
+//         res.status(500).send({ message: "Failed to register case record.", error });
+//       }
+//     });
+
+//     app.patch('/api/hirings/:id', async (req, res) => {
+//       try {
+//         const id = req.params.id;
+//         const { status } = req.body;
+//         const filter = { _id: new ObjectId(id) };
+//         const updateDoc = {
+//           $set: { status: status }
+//         };
+//         const result = await hiringsCollection.updateOne(filter, updateDoc);
+//         res.send(result);
+//       } catch (error) {
+//         res.status(500).send({ message: "Server mutation rejected status change.", error });
+//       }
+//     });
+
+//     /* =========================================================================
+//        ৪. LAWYER BROWSE & DIRECTORY APIS 
+//        ========================================================================= */
+//     app.get('/api/lawyers', async (req, res) => {
+//       try {
+//         const query = {};
+//         if (req.query.specialty) {
+//           query.specialty = { $regex: req.query.specialty, $options: 'i' };
+//         }
+//         const result = await lawyerProfilesCollection.find(query).sort({ _id: -1 }).toArray();
+//         res.send(result);
+//       } catch (error) {
+//         res.status(500).send({ message: "Failed to stream lawyer profiles.", error });
+//       }
+//     });
+
+//     app.get('/api/lawyers/:id', async (req, res) => {
+//       try {
+//         const id = req.params.id;
+//         const query = { _id: new ObjectId(id) };
+//         const result = await lawyerProfilesCollection.findOne(query);
+//         if (!result) {
+//           return res.status(404).send({ message: "Lawyer profile node not found." });
+//         }
+//         res.send(result);
+//       } catch (error) {
+//         res.status(500).send({ message: "Error targeting profile object.", error });
+//       }
+//     });
+
+//     app.post('/api/lawyers', async (req, res) => {
+//       try {
+//         const profile = req.body;
+//         const newProfile = {
+//           ...profile,
+//           createdAt: new Date()
+//         };
+//         const result = await lawyerProfilesCollection.insertOne(newProfile);
+//         res.send(result);
+//       } catch (error) {
+//         res.status(500).send({ message: "Profile creation rejected.", error });
+//       }
+//     });
+
+//     /* =========================================================================
+//        ৫. MEMBERSHIP & CLIENT SUBSCRIPTION PLANS API
+//        ========================================================================= */
+//     app.get('/api/plans', async (req, res) => {
+//       try {
+//         const planId = req.query.plan_id || 'client_free';
+        
+//         // ডাইনামিক মেম্বারশিপ ডেটা স্ট্রাকচার
+//         const mockPlans = {
+//           'client_free': {
+//             name: 'Free Tier',
+//             maxConsultationsPerMonth: 3,
+//             price: 0
+//           },
+//           'client_premium': {
+//             name: 'Premium Tier',
+//             maxConsultationsPerMonth: 20,
+//             price: 1500
+//           }
+//         };
+
+//         const activePlan = mockPlans[planId] || mockPlans['client_free'];
+//         res.send(activePlan);
+//       } catch (error) {
+//         res.status(500).send({ message: "Failed to resolve membership tier status.", error });
+//       }
+//     });
+
+//     // Baseline checks
+//     await client.db("admin").command({ ping: 1 });
+//     console.log("Database baseline checks verified successfully.");
+
+//   } finally {
+//     // Client remains open
+//   }
+// }
+// run().catch(console.dir);
+
+// app.get('/', (req, res) => {
+//   res.send('LegalEase Workflow Optimization Engine Running...');
+// });
+
+// app.listen(port, () => {
+//   console.log(`Server listening quietly on port ${port}`);
+// });
+
+// *****************************************************************
+
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
@@ -387,54 +1240,124 @@ async function run() {
     // কালেকশন ডিক্লারেশন সমূহ
     const servicesCollection = database.collection("services");
     const hiringsCollection = database.collection("hirings");
-    const lawyerProfilesCollection = database.collection("lawyer_profiles"); // নতুন প্রোফাইল কালেকশন
+    const lawyerProfilesCollection = database.collection("lawyer_profiles");
+    const usersCollection = database.collection("users");
 
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
 
     /* =========================================================================
-       ১. SERVICES ENDPOINTS (CRUD)
+       ১. USER METADATA SYNC & PROFILE MANAGEMENT
        ========================================================================= */
-    app.post('/services', async (req, res) => {
-      const newService = req.body;
-      const result = await servicesCollection.insertOne(newService);
-      res.send(result);
-    });
-
-    app.get('/services', async (req, res) => {
-      const result = await servicesCollection.find().toArray();
-      res.send(result);
-    });
-
-    app.put('/services/:id', async (req, res) => {
-      const id = req.params.id;
-      const filter = { _id: new ObjectId(id) };
-      const updatedDoc = { $set: req.body };
-      const result = await servicesCollection.updateOne(filter, updatedDoc);
-      res.send(result);
-    });
-
-    app.delete('/services/:id', async (req, res) => {
-      const id = req.params.id;
-      const filter = { _id: new ObjectId(id) };
-      const result = await servicesCollection.deleteOne(filter);
-      res.send(result);
-    });
-
-    /* =========================================================================
-       ২. LAWYER HIRING HISTORY ENDPOINTS (Inbound Case Requests)
-       ========================================================================= */
-    app.get('/lawyer/hirings/:email', async (req, res) => {
+    app.post('/api/users/sync', async (req, res) => {
       try {
-        const email = req.params.email;
-        const query = { lawyerEmail: email };
-        const result = await hiringsCollection.find(query).sort({ _id: -1 }).toArray();
+        const { email, name, role, image } = req.body;
+        if (!email) return res.status(400).send({ message: "Email parameter is required." });
+
+        const filter = { email: email.toLowerCase().trim() };
+        const updateDoc = {
+          $set: {
+            name,
+            role: role || 'client',
+            image,
+            updatedAt: new Date()
+          },
+          $setOnInsert: {
+            createdAt: new Date()
+          }
+        };
+
+        const result = await usersCollection.updateOne(filter, updateDoc, { upsert: true });
         res.send(result);
       } catch (error) {
-        res.status(500).send({ message: "Database streaming read failure.", error });
+        res.status(500).send({ message: "Account mapping failed.", error });
       }
     });
 
-    app.patch('/hirings/:id', async (req, res) => {
+    /* =========================================================================
+       ২. SERVICES ENDPOINTS (CRUD)
+       ========================================================================= */
+    app.post('/api/services', async (req, res) => {
+      try {
+        const newService = req.body;
+        const result = await servicesCollection.insertOne({
+          ...newService,
+          createdAt: new Date()
+        });
+        res.send(result);
+      } catch (error) {
+        res.status(500).send({ message: "Failed to create service.", error });
+      }
+    });
+
+    app.get('/api/services', async (req, res) => {
+      try {
+        const result = await servicesCollection.find().sort({ _id: -1 }).toArray();
+        res.send(result);
+      } catch (error) {
+        res.status(500).send({ message: "Error streaming services.", error });
+      }
+    });
+
+    app.put('/api/services/:id', async (req, res) => {
+      try {
+        const id = req.params.id;
+        const filter = { _id: new ObjectId(id) };
+        const updatedDoc = { $set: req.body };
+        const result = await servicesCollection.updateOne(filter, updatedDoc);
+        res.send(result);
+      } catch (error) {
+        res.status(500).send({ message: "Service mutation rejected.", error });
+      }
+    });
+
+    app.delete('/api/services/:id', async (req, res) => {
+      try {
+        const id = req.params.id;
+        const filter = { _id: new ObjectId(id) };
+        const result = await servicesCollection.deleteOne(filter);
+        res.send(result);
+      } catch (error) {
+        res.status(500).send({ message: "Service deletion failed.", error });
+      }
+    });
+
+    /* =========================================================================
+       ৩. LAWYER HIRING HISTORY ENDPOINTS (Inbound Case Requests)
+       ========================================================================= */
+    app.get('/api/lawyer/hirings/:emailOrId', async (req, res) => {
+      try {
+        const param = req.params.emailOrId.toLowerCase().trim();
+        
+        // 💡 ডাইনামিক কোয়েরি: lawyerEmail অথবা lawyerId যেকোনো একটির সাথে মিললেই ডেটা কুয়েরি করবে
+        const query = {
+          $or: [
+            { lawyerEmail: param },
+            { lawyerId: param }
+          ]
+        };
+        
+        const result = await hiringsCollection.find(query).sort({ _id: -1 }).toArray();
+        res.send(result);
+      } catch (error) {
+        res.status(500).send({ message: "Database read failure.", error });
+      }
+    });
+
+    app.post('/api/hirings', async (req, res) => {
+      try {
+        const hiringData = req.body;
+        const result = await hiringsCollection.insertOne({
+          ...hiringData,
+          status: hiringData.status || 'pending',
+          createdAt: new Date()
+        });
+        res.send(result);
+      } catch (error) {
+        res.status(500).send({ message: "Failed to register case record.", error });
+      }
+    });
+
+    app.patch('/api/hirings/:id', async (req, res) => {
       try {
         const id = req.params.id;
         const { status } = req.body;
@@ -450,26 +1373,21 @@ async function run() {
     });
 
     /* =========================================================================
-       ৩. LAWYER BROWSE & DIRECTORY APIS (Aligned with HireLoop Spec)
+       ৪. LAWYER BROWSE & DIRECTORY APIS 
        ========================================================================= */
-    
-    // GET: সমস্ত আইনজীবীর প্রোফাইল ফিল্টারসহ নিয়ে আসা
     app.get('/api/lawyers', async (req, res) => {
       try {
         const query = {};
-        // যদি স্পেশালটি কুয়েরি প্যারামিটার থাকে (যেমন: /api/lawyers?specialty=Corporate)
         if (req.query.specialty) {
-          query.specialty = { $regex: req.query.specialty, $options: 'i' }; // Case-insensitive অনুসন্ধান
+          query.specialty = { $regex: req.query.specialty, $options: 'i' };
         }
-        const cursor = lawyerProfilesCollection.find(query).sort({ _id: -1 });
-        const result = await cursor.toArray();
+        const result = await lawyerProfilesCollection.find(query).sort({ _id: -1 }).toArray();
         res.send(result);
       } catch (error) {
         res.status(500).send({ message: "Failed to stream lawyer profiles.", error });
       }
     });
 
-    // GET: সুনির্দিষ্ট আইডি দিয়ে একজন আইনজীবীর প্রোফাইল বের করা
     app.get('/api/lawyers/:id', async (req, res) => {
       try {
         const id = req.params.id;
@@ -480,11 +1398,10 @@ async function run() {
         }
         res.send(result);
       } catch (error) {
-        res.status(500).send({ message: "Error targeting direct object profile.", error });
+        res.status(500).send({ message: "Error targeting profile object.", error });
       }
     });
 
-    // POST: নতুন আইনজীবীর প্রোফাইল ডাটাবেজে যুক্ত করা
     app.post('/api/lawyers', async (req, res) => {
       try {
         const profile = req.body;
@@ -495,16 +1412,44 @@ async function run() {
         const result = await lawyerProfilesCollection.insertOne(newProfile);
         res.send(result);
       } catch (error) {
-        res.status(500).send({ message: "Onboarding state mutation rejected.", error });
+        res.status(500).send({ message: "Profile creation rejected.", error });
       }
     });
 
-    // Send a ping to confirm a successful connection
+    /* =========================================================================
+       ৫. MEMBERSHIP & CLIENT SUBSCRIPTION PLANS API
+       ========================================================================= */
+    app.get('/api/plans', async (req, res) => {
+      try {
+        const planId = req.query.plan_id || 'client_free';
+        
+        // ডাইনামিক মেম্বারশিপ ডেটা স্ট্রাকচার
+        const mockPlans = {
+          'client_free': {
+            name: 'Free Tier',
+            maxConsultationsPerMonth: 3,
+            price: 0
+          },
+          'client_premium': {
+            name: 'Premium Tier',
+            maxConsultationsPerMonth: 20,
+            price: 1500
+          }
+        };
+
+        const activePlan = mockPlans[planId] || mockPlans['client_free'];
+        res.send(activePlan);
+      } catch (error) {
+        res.status(500).send({ message: "Failed to resolve membership tier status.", error });
+      }
+    });
+
+    // Baseline checks
     await client.db("admin").command({ ping: 1 });
-    console.log("Database environment baseline checks verified successfully.");
+    console.log("Database baseline checks verified successfully.");
 
   } finally {
-    // ক্লায়েন্ট অন থাকবে যাতে অনবরত কানেকশন রিসিভ করা যায়
+    // Client remains open
   }
 }
 run().catch(console.dir);
